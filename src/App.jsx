@@ -6,10 +6,16 @@ import Signup from './Signup';
 import { useEffect, useState } from 'react';
 import axiosInstance from './axiosInstance';
 import WriteBoard from './WriteBoard';
+import BoardList from './BoardList';
+import BoardDetail from './BoardDetail';
+import UpdateBoard from './updateBoard';
 
 function App() {
   const [auth, setAuth] = useState(false);
   const [userInfo, setUserInfo] = useState();
+  const [boardData, setBoardData] = useState();
+  const [boards, setBoards] = useState([]);
+  const [rerender, setRerender] = useState(false);
   
   useEffect(() => {
     if(sessionStorage.getItem('jwt'))
@@ -27,6 +33,15 @@ function App() {
     }
   }, [auth])
 
+  useEffect(() => {
+    axiosInstance.get('/')
+      .then(response => {
+        setBoards(response.data);
+      }).catch(error => {
+        console.error(error);
+      })
+  }, [rerender])
+
   return (
     <>
       <Header auth={auth} setAuth={setAuth} userInfo={userInfo} setUserInfo={setUserInfo} />
@@ -41,10 +56,26 @@ function App() {
       }}>테스트</button>
 
       <Routes>
-        <Route path='/' element={<h1>인덱스 페이지</h1>} />
+        <Route path='/' element={<BoardList boards={boards} />} />
         <Route path='/login' element={<Login setAuth={setAuth} />} />
         <Route path='/signup' element={<Signup />} />
-        <Route path='/write' element={<WriteBoard userInfo={userInfo} />} />
+        <Route path='/write' element={<WriteBoard
+          userInfo={userInfo}
+          rerender={rerender}
+          setRerender={setRerender}
+        />} />
+        <Route path='/board/:id' element={<BoardDetail
+          boardData={boardData}
+          setBoardData={setBoardData}
+          rerender={rerender}
+          setRerender={setRerender}
+        />} />
+        <Route path='/board/:id/update' element={<UpdateBoard
+          boardData={boardData}
+          setBoardData={setBoardData}
+          rerender={rerender}
+          setRerender={setRerender}
+        />} />
       </Routes>
 
     </>

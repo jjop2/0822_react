@@ -30,7 +30,7 @@ const Login = ( { setAuth } ) => {
             if(jwt != null ) {
               sessionStorage.setItem('jwt', jwt);
               setAuth(true);
-              navigate('/');
+              history.back();
             }
 
           }).catch(error => {

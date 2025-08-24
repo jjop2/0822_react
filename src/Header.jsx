@@ -11,6 +11,7 @@ const Header = ({ auth, setAuth, userInfo, setUserInfo }) => {
   return (
     <div>
       {userInfo && <p>{userInfo.username}님 환영함</p>}
+      <Link to='/'>홈페이지</Link>
       {
         auth
         ? <Link to='' onClick={logout}>로그아웃</Link>
