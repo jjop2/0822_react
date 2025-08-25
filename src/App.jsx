@@ -9,13 +9,12 @@ import WriteBoard from './WriteBoard';
 import BoardList from './BoardList';
 import BoardDetail from './BoardDetail';
 import UpdateBoard from './updateBoard';
+import { LoginMsg } from './LoginMsg';
 
 function App() {
   const [auth, setAuth] = useState(false);
   const [userInfo, setUserInfo] = useState();
-  const [boardData, setBoardData] = useState();
-  const [boards, setBoards] = useState([]);
-  const [rerender, setRerender] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     if(sessionStorage.getItem('jwt'))
@@ -31,17 +30,13 @@ function App() {
           console.error(error);
         })
     }
+    setLoading(false);
   }, [auth])
 
-  useEffect(() => {
-    axiosInstance.get('/')
-      .then(response => {
-        setBoards(response.data);
-      }).catch(error => {
-        console.error(error);
-      })
-  }, [rerender])
+  if(loading)
+    return <div>로딩중...</div>
 
+  
   return (
     <>
       <Header auth={auth} setAuth={setAuth} userInfo={userInfo} setUserInfo={setUserInfo} />
@@ -56,26 +51,12 @@ function App() {
       }}>테스트</button>
 
       <Routes>
-        <Route path='/' element={<BoardList boards={boards} />} />
+        <Route path='/' element={<BoardList />} />
         <Route path='/login' element={<Login setAuth={setAuth} />} />
         <Route path='/signup' element={<Signup />} />
-        <Route path='/write' element={<WriteBoard
-          userInfo={userInfo}
-          rerender={rerender}
-          setRerender={setRerender}
-        />} />
-        <Route path='/board/:id' element={<BoardDetail
-          boardData={boardData}
-          setBoardData={setBoardData}
-          rerender={rerender}
-          setRerender={setRerender}
-        />} />
-        <Route path='/board/:id/update' element={<UpdateBoard
-          boardData={boardData}
-          setBoardData={setBoardData}
-          rerender={rerender}
-          setRerender={setRerender}
-        />} />
+        <Route path='/write' element={auth ? <WriteBoard userInfo={userInfo} /> : <LoginMsg />} />
+        <Route path='/board/:id' element={auth ? <BoardDetail userInfo={userInfo} /> : <LoginMsg />} />
+        <Route path='/board/:id/update' element={auth ? <UpdateBoard userInfo={userInfo} /> : <LoginMsg />} />
       </Routes>
 
     </>

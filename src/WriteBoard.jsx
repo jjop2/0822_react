@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axiosInstance from "./axiosInstance";
 import { useNavigate } from "react-router-dom";
-import useRequireLogin from "./useRequireLogin";
 
-const WriteBoard = ({ userInfo, rerender, setRerender }) => {
-  useRequireLogin();
-
+const WriteBoard = ({ userInfo }) => {
   const [board, setboard] = useState({
     "title" : '',
     "content" : '',
@@ -36,7 +33,6 @@ const WriteBoard = ({ userInfo, rerender, setRerender }) => {
         axiosInstance.post('/board', board)
           .then(response => {
             alert(response.data);
-            setRerender(!rerender);
             navigate('/');
           }).catch(error => {
             console.error(error);

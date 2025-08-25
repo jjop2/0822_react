@@ -1,12 +1,11 @@
-import { useState } from "react";
-import useRequireLogin from "./useRequireLogin";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "./axiosInstance";
 
-const UpdateBoard = ( {boardData, setBoardData, rerender, setRerender} ) => {
-  useRequireLogin();
-
+const UpdateBoard = ( {userInfo} ) => {
   const { id } = useParams();
+  const [board, setBoard] = useState();
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const [update, setUpdate] = useState({
@@ -15,10 +14,28 @@ const UpdateBoard = ( {boardData, setBoardData, rerender, setRerender} ) => {
     "content" : ''
   });
 
+  useEffect(() => {
+    if(!sessionStorage.getItem('jwt'))
+      return;
+
+    axiosInstance.get(`/board/${id}`)
+      .then(response => {
+        setBoard(response.data)
+      }).catch(error => {
+        console.error(error)
+      }).finally(() => {
+        setLoading(false)
+      })
+  }, [])
+  
   // 이 이상 늘어나면 컴포넌트로 빼자..
-  if(boardData == null)
+  if(loading || !userInfo)
     return <div>페이지 불러오는 중...</div>
 
+  if(userInfo.username !== board.writer) {
+    alert('잘못된 접근');
+    history.back();
+  }
 
   const onChangeHandler = (e) => {
     setUpdate({
@@ -30,8 +47,8 @@ const UpdateBoard = ( {boardData, setBoardData, rerender, setRerender} ) => {
 
   return (
     <div>
-      제목<br /><input type="text" name="title" defaultValue={boardData.title} onChange={onChangeHandler}/> <br />
-      내용<br /><textarea name="content" defaultValue={boardData.content} onChange={onChangeHandler}></textarea> <br />
+      제목<br /><input type="text" name="title" defaultValue={board.title} onChange={onChangeHandler}/> <br />
+      내용<br /><textarea name="content" defaultValue={board.content} onChange={onChangeHandler}></textarea> <br />
       <button onClick={() => history.back()}>취소</button>
       <button onClick={() => {
         if(!update.title && !update.content) {
@@ -46,7 +63,6 @@ const UpdateBoard = ( {boardData, setBoardData, rerender, setRerender} ) => {
         axiosInstance.put('/board', update)
           .then(response => {
             alert(response.data);
-            setRerender(!rerender);
             navigate('/');
           }).catch(error => {
             console.error(error);
